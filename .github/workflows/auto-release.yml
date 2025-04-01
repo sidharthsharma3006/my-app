@@ -1,59 +1,46 @@
-name: Auto Create Release Branch and Deploy
+name: Create New Release Branch
 
 on:
-  workflow_dispatch:  # Allows manual triggering
+  workflow_dispatch:  # Allows manual trigger
 
 jobs:
   create-release-branch:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Needed to push changes to the repo
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all branches
+          fetch-depth: 0  # Ensure all branches are fetched
 
       - name: Get Latest Release Branch
-        id: latest_branch
+        id: get-latest-release
         run: |
-          LATEST_BRANCH=$(git branch -r | grep 'origin/release-' | sed 's|origin/release-||' | sort -n | tail -1)
-          if [[ -z "$LATEST_BRANCH" ]]; then
-            NEW_BRANCH="release-1"
+          latest_release=$(git branch -r | grep -o 'release-[0-9]\+' | sort -V | tail -n 1)
+          if [ -z "$latest_release" ]; then
+            new_release="release-1"
           else
-            NEW_BRANCH="release-$((LATEST_BRANCH + 1))"
+            latest_number=$(echo "$latest_release" | grep -o '[0-9]\+$')
+            new_number=$((latest_number + 1))
+            new_release="release-$new_number"
           fi
-          echo "NEW_BRANCH=$NEW_BRANCH" >> $GITHUB_ENV
-          echo "New branch will be: $NEW_BRANCH"
+          echo "NEW_RELEASE=$new_release" >> $GITHUB_ENV
+          echo "New release branch: $new_release"
 
-      - name: Create New Release Branch
+      - name: Update deploy.yml in Main Branch
         run: |
           git checkout main
           git pull origin main
-          git checkout -b $NEW_BRANCH
-          git push origin $NEW_BRANCH
-
-      - name: Update deploy.yaml in Both Branches
-        run: |
-          sed -i "s/release-[0-9]\+/$NEW_BRANCH/" .github/workflows/deploy.yaml
-          git add .github/workflows/deploy.yaml
-          git commit -m "Update deploy.yaml for $NEW_BRANCH"
-          git push origin main
-          
-          # Checkout new release branch and update deploy.yaml
-          git checkout $NEW_BRANCH
-          git cherry-pick main  # Apply the change from main
-          git push origin $NEW_BRANCH
-
-      - name: Commit and Push Changes
-        run: |
-          git config --global user.name "github-actions"
+          sed -i "s/branches:\n      - release-[0-9]\+/branches:\n      - $NEW_RELEASE/" .github/workflows/deploy.yml
           git config --global user.email "github-actions@github.com"
-          git add .github/workflows/deploy.yaml
-          git commit -m "Update deploy.yaml for $NEW_BRANCH"
+          git config --global user.name "GitHub Actions"
+          git commit -am "Update deploy.yml to track $NEW_RELEASE"
           git push origin main
 
-      - name: Trigger Deployment
+      - name: Create and Push New Release Branch
         run: |
-          gh workflow run deploy.yaml --ref $NEW_BRANCH
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          git checkout -b "$NEW_RELEASE"
+          git push origin "$NEW_RELEASE"
+
