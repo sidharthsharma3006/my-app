@@ -32,9 +32,17 @@ jobs:
           git checkout -b $NEW_BRANCH
           git push origin $NEW_BRANCH
 
-      - name: Update deploy.yaml with New Branch
+            - name: Update deploy.yaml in Both Branches
         run: |
           sed -i "s/release-[0-9]\+/$NEW_BRANCH/" .github/workflows/deploy.yaml
+          git add .github/workflows/deploy.yaml
+          git commit -m "Update deploy.yaml for $NEW_BRANCH"
+          git push origin main
+          
+          # Checkout new release branch and update deploy.yaml
+          git checkout $NEW_BRANCH
+          git cherry-pick main  # Apply the change from main
+          git push origin $NEW_BRANCH
 
       - name: Commit and Push Changes
         run: |
