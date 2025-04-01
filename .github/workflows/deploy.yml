@@ -3,7 +3,7 @@ name: Deploy React App
 on:
   push:
     branches:
-      - release-*  # Matches any branch starting with 'release-'
+      - release-1  # Matches any branch starting with 'release-'
 
 jobs:
   build-and-deploy:
