@@ -33,11 +33,11 @@ jobs:
         run: |
           git checkout main
           git pull origin main
-          sed -i "s/branches:\n      - release-[0-9]\+/branches:\n      - $NEW_RELEASE/" .github/workflows/deploy.yml
+          sed -i -E "s/(branches:\s*- release-)[0-9]+/\1$NEW_RELEASE/" .github/workflows/deploy.yml
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
-          git commit -am "Update deploy.yml to track $NEW_RELEASE"
-          git push origin main
+          git diff --quiet || (git commit -am "Update deploy.yml to track $NEW_RELEASE" && git push origin main)
+
 
       - name: Create and Push New Release Branch
         run: |
