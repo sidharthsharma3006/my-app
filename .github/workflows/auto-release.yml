@@ -36,7 +36,6 @@ jobs:
 
       - name: Update deploy.yml in New Release Branch
         run: |
-          git checkout "$NEW_RELEASE"
           sed -i -E "s/(branches:\s*- release-)[0-9]+/\1$NEW_RELEASE/" .github/workflows/deploy.yml
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
