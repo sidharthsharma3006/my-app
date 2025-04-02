@@ -34,7 +34,7 @@ jobs:
           git checkout -b "$NEW_RELEASE"
           git push origin "$NEW_RELEASE"
 
-            - name: Debug deploy.yml Update
+      - name: Debug deploy.yml Update
         run: |
           echo "Before update:"
           cat .github/workflows/deploy.yml
