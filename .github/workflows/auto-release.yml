@@ -37,6 +37,7 @@ jobs:
       - name: Update deploy.yml in New Release Branch
         run: |
           sed -i -E "s/(branches:\s*- release-)[0-9]+/\1$NEW_RELEASE/" .github/workflows/deploy.yml
+          git diff .github/workflows/deploy.yml || echo "No changes detected in deploy.yml"
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
           git diff --quiet || (git commit -am "Update deploy.yml to track $NEW_RELEASE" && git push origin "$NEW_RELEASE")
