@@ -38,7 +38,7 @@ jobs:
         run: |
           echo "Before update:"
           cat .github/workflows/deploy.yml
-          sed -i -E "s/(branches:\s*- release-)[0-9]+/\1$NEW_RELEASE/" .github/workflows/deploy.yml
+          sed -i -E "s/(- release-)[0-9]+/\1$NEW_RELEASE/g" .github/workflows/deploy.yml
           echo "After update:"
           cat .github/workflows/deploy.yml
           git diff || echo "No changes detected in deploy.yml"
