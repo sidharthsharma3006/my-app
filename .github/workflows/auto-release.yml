@@ -41,7 +41,7 @@ jobs:
           cat .github/workflows/deploy.yml
           
           # Correct regex to replace old release branch number
-          sed -i -E "s/(release-)[0-9]+/\1$NEW_RELEASE/g" .github/workflows/deploy.yml
+          sed -i -E "s/release-[0-9]+/$NEW_RELEASE/g" .github/workflows/deploy.yml
           
           echo "After update:"
           cat .github/workflows/deploy.yml
